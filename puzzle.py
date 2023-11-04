@@ -17,8 +17,12 @@ knowledge0 = And(
 # Puzzle 1
 # A says "We are both knaves."
 # B says nothing.
-knowledge1 = And(AKnave, BKnave)
-knowledge1 = And()
+knowledge1 = And(
+    Implication(AKnight, And(AKnave, BKnave)),
+    Or(And(AKnight, BKnave), And(AKnave, BKnight)),
+    Or(And(AKnight, Not(AKnave)), And(AKnave, Not(AKnight))),
+    Or(And(BKnight, Not(BKnave)), And(BKnave, Not(BKnight))),
+)
 
 
 # Puzzle 2
@@ -38,7 +42,14 @@ knowledge3 = And(
 
 
 def main():
-    symbols = [AKnight, AKnave]
+    symbols = [
+        AKnight,
+        AKnave,
+        BKnight,
+        BKnave,
+        # CKnight,
+        # CKnave,
+    ]
     puzzles = [
         ("Puzzle 0", knowledge0),
         ("Puzzle 1", knowledge1),
@@ -52,6 +63,7 @@ def main():
             print("    Not yet implemented.")
         else:
             for symbol in symbols:
+                print(f"query = {symbol}")
                 if model_check(knowledge, symbol):
                     print(f"    {symbol}")
 
