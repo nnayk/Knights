@@ -18,8 +18,8 @@ knowledge0 = And(
 # A says "We are both knaves."
 # B says nothing.
 knowledge1 = And(
-    Implication(AKnight, And(AKnave, BKnave)),
-    Or(And(AKnight, BKnave), And(AKnave, BKnight)),
+    Implication(And(AKnight, Not(AKnave)), And(AKnave, BKnave)),
+    Implication(Not(And(AKnight, Not(AKnave))), Not(And(AKnave, BKnave))),
     Or(And(AKnight, Not(AKnave)), And(AKnave, Not(AKnight))),
     Or(And(BKnight, Not(BKnave)), And(BKnave, Not(BKnight))),
 )
@@ -30,14 +30,21 @@ knowledge1 = And(
 # B says "We are of different kinds."
 knowledge2 = And(
     Implication(
-        And(And(AKnight, BKnave), Not(And(AKnave, BKnight))),
+        AKnight,
         Or(And(AKnight, BKnight), And(AKnave, BKnave)),
     ),
     Implication(
-        And(And(AKnave, BKnight), Not(And(AKnight, BKnave))),
+        Not(AKnight),
+        Not(Or(And(AKnight, BKnight), And(AKnave, BKnave))),
+    ),
+    Implication(
+        BKnight,
         Or(And(AKnight, BKnave), And(AKnave, BKnight)),
     ),
-    Or(And(AKnight, BKnave), And(AKnave, BKnight)),
+    Implication(
+        Not(BKnight),
+        Not(Or(And(AKnight, BKnave), And(AKnave, BKnight))),
+    ),
     Or(And(AKnight, Not(AKnave)), And(AKnave, Not(AKnight))),
     Or(And(BKnight, Not(BKnave)), And(BKnave, Not(BKnight))),
 )
@@ -48,7 +55,15 @@ knowledge2 = And(
 # B says "C is a knave."
 # C says "A is a knight."
 knowledge3 = And(
-    # TODO
+    Implication(BKnight, Implication(AKnight, AKnave)),
+    Implication(BKnight, Implication(Not(AKnight), Not(AKnave))),
+    Implication(BKnight, CKnave),
+    Implication(Not(BKnight), Not(CKnave)),
+    Implication(CKnight, AKnight),
+    Implication(Not(CKnight), Not(AKnight)),
+    Or(And(AKnight, Not(AKnave)), And(AKnave, Not(AKnight))),
+    Or(And(BKnight, Not(BKnave)), And(BKnave, Not(BKnight))),
+    Or(And(CKnight, Not(CKnave)), And(CKnave, Not(CKnight))),
 )
 
 
@@ -58,8 +73,8 @@ def main():
         AKnave,
         BKnight,
         BKnave,
-        # CKnight,
-        # CKnave,
+        CKnight,
+        CKnave,
     ]
     puzzles = [
         ("Puzzle 0", knowledge0),
@@ -69,12 +84,10 @@ def main():
     ]
     for puzzle, knowledge in puzzles:
         print(puzzle)
-        print(knowledge.conjuncts)
         if len(knowledge.conjuncts) == 0:
             print("    Not yet implemented.")
         else:
             for symbol in symbols:
-                print(f"query = {symbol}")
                 if model_check(knowledge, symbol):
                     print(f"    {symbol}")
 
